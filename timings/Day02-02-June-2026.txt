@@ -1,0 +1,12 @@
+#today what we have done
+
+2 = Conducted Morning Session On Linux Topic
+
+today we have learned the basic commands of linux like - cd, pwd, and also learn about the group, permissions,
+hard like , soft link etc
+
+
+#Tomorrow task
+
+tomorrow we will explore the more advanced linux commands and their use cases
+
