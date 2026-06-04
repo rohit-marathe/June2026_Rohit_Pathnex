@@ -1,0 +1,9 @@
+today
+
+  2 - we had the morning session where we have learnt about the linux today we have exlored the like how to kill 
+process with name and process id, difference between green fit project and brown fit project. also how to find 
+the older log / file , recent file difference between grep and egrep
+
+tomorrow 
+
+we will be starting the git or else planned for interview questions and answer session

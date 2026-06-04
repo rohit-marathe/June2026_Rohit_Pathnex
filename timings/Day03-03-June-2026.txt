@@ -1,0 +1,12 @@
+#today
+
+2 = today we have morning session where we have learned about the additional linux cmd also launch the ec2 instance 
+  in aws for performing the cmd on the server insted of local
+
+also neeraj has told us in class that in today evening session we have talk about the - "types of ip address" and 
+have to explain in the session
+
+
+#tomorrow
+
+tomorrow will be we can continue the linux or may be we can start with git as per the roadmap
