@@ -1,0 +1,10 @@
+today
+
+3 hours - we have learned about the git so we have learned like how devlopers 
+and team collborate and made changes and maintain the codebase
+
+
+tomorrow
+
+by tomorrow we will be starting out with aws and exploring the services that
+provided by aws
