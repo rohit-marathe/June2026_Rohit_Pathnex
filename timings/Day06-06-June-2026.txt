@@ -1,0 +1,11 @@
+#today
+
+
+4 - we have today start with aws and we had explore the some popular aws services like ec2, vpc , s3 and alos 
+explore
+the storage services like s3, ebs, efs and hwo they are differenet from each other
+
+
+#tomorrow 
+
+tomorrow will be explore the more aws services
