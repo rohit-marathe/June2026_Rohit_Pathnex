@@ -1,0 +1,160 @@
+Day - 6 Debug Day
+
+fix the broken files
+
+#old broken file
+
+- name Install nginx
+hosts all
+become yes
+tasks:
+ -name: Install nginx
+ yum:
+  name nginx
+  state present
+
+#fixed ansible file
+
+-name: Install nginx
+hosts: all
+become: yes
+
+tasks:
+ - name: Install nginx
+   yum:
+    name: nginx
+    state: present
+
+| Old                        | Fixed                               |
+| -------------------------- | ----------------------------------- |
+| - name Install nginx       | - name: Install nginx               |
+| hosts all                  | hosts: all                          |
+| become yes                 | become: yes                         |
+| -name: Install nginx       | - name: Install nginx               |
+| yum: not properly nested   | yum: properly indented under task   |
+
+#old terraform code 
+
+resources "aws_instance" "BrokenEC2" {
+    ami = "ami-0xyz"
+    instance_type = t2.micro
+tags {
+ Name = "Broken"
+}
+}
+
+#fixed terraform code
+
+resources "aws_instance" "BrokenEC2" {
+    ami = "ami-0xyz"
+    instance_type = "t2.micro"
+    
+    tags = {
+        Name = "Broken"
+    }
+}
+
+
+| Old                       | Fixed                        |
+| ------------------------- | ---------------------------- |
+| instance_type = t2.micro  | instance_type = "t2.micro"   |
+| tags {                    | tags = {                     |
+
+#kubernetes old yaml file
+
+apiVersion v1
+kind Pod
+metadata:
+ name pathnex
+spec
+ containers:
+    - name app
+      image nginx
+
+#fixed kubernetes yaml file
+
+apiVersion: v1
+kind: Pod
+
+metadata:
+    name: pathnex
+
+spec:
+    containers:
+        - name: app
+          image: nginx
+
+
+| Old            | Fixed            |
+| -------------- | ---------------- |
+| apiVersion v1  | apiVersion: v1   |
+| kind Pod       | kind: Pod        |
+| name pathnex   | name: pathnex    |
+| spec           | spec:            |
+| image nginx    | image: nginx     |
+
+
+#old jenkins pipeline
+
+stage('Build') {
+    steps {
+        sh '''
+        mvn clean compile || { echo "compile failed"; exist 1; }
+    }
+}
+
+#fixed jenkins pipeline
+
+stage('Build') {
+    steps {
+        sh 'mvn clean compile'
+    }
+}
+
+
+| Old                                                     | Fixed             |
+| ------------------------------------------------------- | ----------------- |
+| mvn clean compile \|\| { echo "Compile failed"; exit 1; } | mvn clean compile |
+| mvn test \|\| { echo "Tests failed"; exit 1; }            | mvn test          |
+
+
+#Gitlab ci old yaml file
+
+build:
+    scripts:
+     - git clone https://github.com/Pathnex/sample-java-app.git
+     - cd sample-java-app
+     - mvn clena compile
+
+test:
+ script:
+    - cd sample-java-app
+    - mvn test
+
+
+#fixed gitlab ci new yaml file
+
+build:
+    stages: build
+    script:
+        - git clone https://github.com/Pathnex/sample-java-app.git
+        - cd sample-java-app
+        - mvn clean compile
+    artifacts:
+        paths:
+            - sample-java-app/
+
+test:
+    stage: test
+    dependencies:
+        - build
+    script:
+        - cd sample-java-app
+        - mvn test
+
+| Old                         | Fixed                             |
+| --------------------------- | --------------------------------- |
+| No artifacts section        | Added artifacts section           |
+| No dependencies section     | Added dependencies: build         |
+| Files lost between jobs     | Files shared using artifacts      |
+| Test job can't find project | Test job can access project files |
