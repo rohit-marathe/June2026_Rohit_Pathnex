@@ -1,0 +1,114 @@
+# Day 07 — SPEED TYPING
+
+1 - ansible install nginx
+
+- name: Install and start nginx
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Install nginx package
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+    
+    - name: Ensure nginx services is running
+      services:
+        name: nginx
+        state: started
+        enabled: yes
+
+2 - terraform create an ec2 instance
+
+provider "aws" {
+    region = "us-east-1"
+}
+
+resource "aws_instance" "pathnex_server" {
+    ami = "ami-0c02fb55956c7d316"
+    instance_type = "t3.micro"
+
+    tags = {
+        name = "Pathenx-EC2"
+    }
+}
+
+output "instances_public_ip" {
+    value = aws_instance.pathnex_server.instances_public_ip
+}
+
+3 - kubernetes deployment with 2 replica
+
+apiVersion: apps/v1
+kind: deployment
+metadata:
+    name: inventory-apps
+spec:
+    replica: 2
+
+    selector:
+        matchlabels:
+        app: inventory
+    
+    template:
+        metadata:
+            labels:
+                app: inventory
+    
+    spec:
+        containers:
+            - name: inventory-containers
+              image: nginx:stable
+              ports:
+                - cotainerPort: 80
+
+4 - shell script: print current datee and system uptime
+
+#!/bin/bash
+
+echo "Current Date and Time:"
+date
+
+echo ""
+echo "System Uptime:"
+uptime
+
+## jenkins pipeline - Parameterized
+
+pipeline {
+    agent any
+    parameters {
+        string(name: 'ENVIRONMENT', defaultValue: 'dev', description: 'Deployment Environment')
+    }
+    Environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Pathnex/sample-java-app.git'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME"'
+            }
+        }
+    }
+}
+
+## Gitlab CI - Parameterized via Variables
+
+stages:
+    - deploy
+
+variables:
+    INSTITUTE_NAME: "Pathnex"
+    ENVIRONMENT: "dev"
+
+deploy:
+    stage: deploy
+    image: alpine:latest
+    script:
+        - echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME
