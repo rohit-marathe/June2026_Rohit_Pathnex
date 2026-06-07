@@ -1,0 +1,9 @@
+# today
+
+i have compelete the assingment task where we have to create some
+ansible playbook file, terraform modules and k8s yaml file
+
+#tomorrow
+
+tomorrow we will be exploring more indepth of 
+aws services
