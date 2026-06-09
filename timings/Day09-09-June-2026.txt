@@ -1,0 +1,10 @@
+# Today
+
+in the morning session we have completd the aws 
+and learnt about the different aws services - like
+codepipline, code deploy , elastic beankstalk
+
+#tomorrow 
+
+we are going to start with the docker and going to 
+understand how we can containerize the application
