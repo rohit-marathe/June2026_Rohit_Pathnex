@@ -1,0 +1,9 @@
+#today
+
+in the morning session we have explored mostly to security aspect
+such as cloudwatch, aws inspector, guard duty and many more
+
+#tomorrow
+
+by tomorrow we will almost finish up the reaming aws services
+and complete the aws 

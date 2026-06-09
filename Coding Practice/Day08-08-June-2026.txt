@@ -1,0 +1,142 @@
+#Day 08 - variables, vpc, probes, logs
+
+## Ansible - Install Packages Using Variables
+
+---
+
+- name: Install packages for pathnex using variables
+  hosts: all
+  become: yes
+
+  vars:
+    pathnex_packages:
+        - tree
+        - unzip
+        - vim
+    
+    tasks:
+        - name: Install required packages
+          yum:
+            name: "{{pathnex_packages}}"
+            state: present
+
+## Terraform - create vpc + subnet
+
+provider "aws" {
+    region = "us-east-1"
+}
+
+resource "aws_vpc" "PathnexVPC" {
+    cidr_block = "10.10.0.0/16"
+
+    tags = {
+        Name = "Pathnex-VPC"
+    }
+}
+
+resource = "aws_subnet" "PathnexSubnet" {
+
+    vpc_id = aws_vpc.PathnexVPC.id 
+    cidr_block = "10.10.1.0/24"
+    map_public_ip_on_launch = true
+
+    tags = {
+        Name = "Pathnex-Subnet"
+    }
+
+}
+
+#kubernetes - add liveness & Readiness probes
+
+apiVersion: v1
+kind: Pod 
+metadata: 
+    name: pathnex-probe-Pod
+spec: 
+    containers:
+        - name: web
+          image: nginx
+          livenessProbe:
+            httpGet:
+                path: /
+                port: 80
+            initialDelaySecond: 5
+          readinessProbe:
+            httpGet:
+                path: /
+                port: 80
+            initialDelaySecond: 3 
+
+# Shell Script - Loop Through List
+
+#!/bin/bash
+
+for item in pathnex DevOps training; DevOps
+    echo "Item: $item"
+done 
+
+#conditional stages
+
+#Jenkins pipeline - conditional execution 
+
+You will learn how to run stages based on branch or parameter conditions.
+
+pipeline {
+    agent any
+    parameters {
+        string(name: 'ENVIRONMENT', defaultValue: 'dev', description: 'Deployment Environment')
+    }
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Pathnex/sample-java-app.git'
+            }
+        }
+        stage('Build') {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh 'mvn clean compile'
+            }
+        }
+        stage('Deploy') {
+            when {
+                expression { params.ENVIRONMENT == 'dev' }
+            }
+            steps {
+                sh 'echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME"'
+            }
+        }
+    }
+}
+
+
+
+## Gitalb CI - conditional jobs
+
+stages:
+    - build:
+    - deploy
+
+build: 
+    stage: build
+    image: maven:3.8.1.-jdk-17
+    script:
+        - git clone https://github.com/Pathnex/sample-java-app.git
+        - cd sample-java-app
+        - mvn clean compile
+    only:
+        - main 
+
+deploy:
+    stage: deploy
+    image: alpine:latest
+    script:
+        - echo "Deploying to $CI_ENVIRONMENT_NAME by Pathnex"
+    only:
+        variables:
+            - $CI_ENVIRONMENT_NAME == "dev"
