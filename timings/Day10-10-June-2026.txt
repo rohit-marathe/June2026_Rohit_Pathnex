@@ -1,0 +1,12 @@
+#Today
+
+in the moring session we have completed the docker
+where we have learnt about how we can containerize 
+the application
+
+
+#tomorrow
+
+by tomorrow we are planning to start with kubernetes
+as per mentioned in the roadmap so we will learn how
+how to orchestrate the containerize applcaition 
