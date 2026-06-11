@@ -1,0 +1,12 @@
+# Today
+
+in the morning session we have learned about the
+kubernetes that is open source container orchestration tool
+that ensure that the applicaiton should be high avability,
+scalability and realiability 
+
+#tomorrow
+
+by tomorrow we are going to cover the reaming the
+points of kubernetes such as - deployment , service
+etc
