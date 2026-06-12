@@ -1,0 +1,242 @@
+#Day 12
+
+#Ansible - Ensure file with content 
+
+---
+
+- name: Create config file for pathnex
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Write content to file
+      copy: 
+        dest: /etc/pathnex.conf
+        content: |
+            Welcome to Pathnext DevOps Training
+            Today is Day 12
+
+#Terraform - RDS Skeleton
+
+resource "aws_db_instance" "PathnexRDS" {
+    allocate = 20
+    engine = "mysql"
+    instance_class = "db.t3.micro"
+    name = "pathnexdb"
+    username =  "admin"
+    password = "password123"
+    skip_final_snapshot = true
+}
+
+#Kubernetes - Rolling Update Strategy
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: pathnex-rollin 
+spec:
+    replicas: 3
+    strategy:
+        type: RollingUdpate
+        rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 1
+    selector:
+        matchLabels:
+            app: roll
+    template:
+        metadata:
+            labels:
+                app: roll
+        spec:
+            containers:
+                - name: web
+                  image: nginx
+
+# Shell Script - Backup Directory
+
+#!/bin/bash
+
+SOURCE="/var/log"
+DEST="/backup/pathnex-$(date +%F).tar.gz"
+
+tar -czf $DEST $SOURCE
+
+#Multi Branch Jenkins Pipelines 
+
+pipeline {
+    agent any
+    environment {
+        INSTITUTE = "Pathnex"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn clean compile'
+            }
+        }    
+    }
+}
+
+#Gitlab CI - Branch Specific Jobs
+
+stages: 
+    - Build
+
+build-main:
+    stage: build
+    image: maven:3.8.1-jdk-17
+    script:
+        - mvn clean compile
+    only:
+        - main
+
+build-dev:
+    stage: build
+    image: maven:3.8.1-jdk-17
+    script:
+        - mvn clean compile
+    only:
+        - dev
+
+## L2 - Coding Practice
+
+#Ansible - Setup Auto-Scaling Group (ASG)
+
+- name: Setup Auto Scaling Group 
+  hosts: all
+  become: yes
+  tasks:
+    - name: Create Launch Configuration
+      ec2_asg:
+        name: pathnex-asg 
+        region: us-east-1
+        lauch_config_name: pathnex-launch-config
+        min_size: 1
+        max_size: 3
+        desired_capacity: 2
+        vpc_zone_identifier: subnet-12345678
+
+terraform - create a load balancer with EC2 instance_class
+
+resource "aws_lb" "pathnex_lb" {
+    name = "pathnex-lb"
+    internal = false 
+    load_balancer_type = "application"
+    security_groups = [aws_security_group.allow_ssh_http.id]
+    subnets = [aws_subnet.public.id]
+}
+
+resource "aws_instance" "pathnex_ec2" {
+    ami = "ami-0abcd1234abcd1234"
+    instance_type = "t2.micro"
+    security_groups = [aws_security_group.allow_ssh_http.name]
+    tags = {
+        Name = "Pathnex-EC2"
+    }
+}
+
+kubernetes Horizontal Pod Autoscaler
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: pathnex-web-app
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: pathnex-web-app
+    template:
+        metadata:
+            labels:
+                app: pathnex-web-app
+        spec:
+            containers:
+                -name: web
+                 image: nginx
+                 ports:
+                    - containerPort: 80
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoScaler
+metadata:
+    name: pathnex-web-app-hpa 
+spec:
+    scaleTargertRef:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: pathnex-web-app
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+
+#Jenkinsfile - implemenet Paralle stages
+
+pipeline {
+    agent any 
+    stage {
+        stage('Build & Test') {
+            parallel {
+                stage('Build') {
+                    steps {
+                        echo 'Building project...'
+                    }
+                }
+                stage('Test') {
+                    step {
+                        echo 'Running tests...'
+                    }
+                }
+            }
+        }
+        stage(Deploy) {
+            steps {
+                echo 'Deploying Project...'
+            }
+        }
+    }
+}
+
+#Gitalb CI/CD - Parallel Jobs Build & test
+
+stages:
+    - build 
+    - test
+    - Deploy
+
+build:
+    stage: build
+    script: 
+        - docker build -t pathnex-web-app .
+
+test: 
+    stage: test
+    script: 
+        - docker run pathnex-web-app npm test
+
+deploy:
+    stage: test
+    script:
+        - kubectl apply -f kubernetes/deployment.yaml
+
+#Docker Volumes
+
+FROM ubuntu
+VOLUME ["/opt/pathnex/data"]
+CMD ["sleeep", "1000"]
+
+#Real Path
+
+/opt/pathnex/data
+
+#bash command
+
+docker volume create pathnex-volume
+

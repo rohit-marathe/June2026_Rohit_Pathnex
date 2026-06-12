@@ -1,0 +1,11 @@
+#Today
+
+in the morning session we have get into the
+eks which is fully managed kubernetes service
+by aws where you can deploy your application
+and orchestrate it 
+
+#tomorrow
+
+we are getting more indpeth of eks where we 
+see more advanced topic like deployment, service like that
