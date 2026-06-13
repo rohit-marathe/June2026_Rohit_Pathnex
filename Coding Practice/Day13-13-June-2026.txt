@@ -1,0 +1,359 @@
+#Day - Fixing filse 
+
+## 🔹 Ansible (broken)
+
+- name "Broken"
+ hosts: all
+ tasks:
+   - name: Install
+     yum:
+       name: nginx
+       state present
+
+
+##Fix Ansible File 
+
+--- 
+- name: Broken
+  hosts: all
+  tasks:
+    - name: Install nginx
+      yum: 
+        name: nginx
+        state: present
+
+#Issues fixed
+1-Missing colon after name
+2-Missing colon after state
+3-YAML indentation corrected
+
+
+
+## 🔹 Terraform (broken)
+
+resouce "aws_instance" BadEC2 {
+  ami = ami-123
+instance_type="c5.large"
+tags = {
+ Name:"Broken"
+}
+}
+
+## Terraform - Fix Code 
+
+resource "aws_instance" "BadEC2" {
+    ami = "ami-123"
+    instance_type = "c5.large"
+
+    tags = {
+        Name = "Broken"
+    }
+}
+
+#Issues fixed
+1-resouce → resource
+2-Resource name must be in quotes
+3-AMI value should be a string
+4-Name:"Broken" → Name = "Broken"
+5-Formatting and indentation improved
+
+## 🔹 Kubernetes (broken)
+
+apiVersion apps/v1
+kind Deployment
+metadata:
+name broken
+spec:
+ replicas 2
+ selector:
+   matchLabels:
+     app broken
+ template:
+  metadata:
+    labels:
+      app broken
+  spec:
+    containers:
+     - name app
+       image nginx
+
+#Kubernetes fixed
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: broken 
+
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: broken
+    template:
+        metadata:
+        labels:
+            app: broken
+        
+        spec:
+            containers:
+                -name: app
+                 image: nginx
+
+#ssues fixed
+1-Missing colons (:) after keys such as apiVersion, replicas, and app
+2-Incorrect YAML indentation
+3-Deployment structure aligned with Kubernetes schema
+
+# Matrix Builds
+
+## 🔹 Jenkins Pipeline — Matrix Build
+You will learn how to **run the same build on multiple environments**.
+
+pipeline {
+    agent any
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    matrix {
+        axes {
+            axis {
+                name 'JAVA_VERSION'
+                values '8', '11', '17'
+            }
+        }
+        stages {
+            stage('Build') {
+                steps {
+                    sh "echo Building with Java $JAVA_VERSION"
+                }
+            }
+        }
+    }
+}
+
+
+#Jenkins - Fixed 
+
+pipeline {
+    agent any
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    stages {
+        stage('Matrix Build') {
+            matrix {
+                axes {
+                    axis {
+                        name 'JAVA_VERSION'
+                        values '8', '11', '17'
+                    }
+                }
+            }
+        }
+        stage {
+            stage('Build') {
+                steps {
+                    sh "echo Building with Java ${JAVA_VERSION}"
+                }
+            }
+        }
+    }
+}
+
+Issues fixed
+1-Moved matrix inside a stage under the stages block (required in Declarative Pipeline syntax).
+2-Added a wrapper stage (Matrix Build) for better pipeline organization.
+3-Used ${JAVA_VERSION} in the shell command for clearer variable interpolation.
+4-Improved indentation and formatting for readability.
+
+
+## 🔹 GitLab CI — Matrix Jobs
+You will learn how to **run jobs across multiple environments using matrix**.
+
+stages:
+  - build
+
+build:
+  stage: build
+  image: maven:3.8.1-jdk-17
+  parallel:
+    matrix:
+      - JAVA_VERSION: ['8', '11', '17']
+  script:
+    - echo "Building with Java $JAVA_VERSION"
+
+## GitLab CI - Fixed
+
+stages:
+    - build
+
+build:
+    stage: build
+    image: maven:3.8.1-jdk-17
+
+    parallel:
+        matrix:
+            - JAVA_VERSION: ['8', '11', '17']
+
+    script:
+        - echo "Building with Java $JAVA_VERSION"
+
+#Issues fixed
+1-No syntax errors found.
+2-Verified correct use of parallel.matrix.
+3-Confirmed proper YAML indentation.
+4-Confirmed variable definition (JAVA_VERSION) and usage ($JAVA_VERSION) are correct.
+5-Formatting standardized for readability and maintainability.
+
+
+# L2 - Coding Practice
+
+#Ansible - Multi Node Nginx Setup 
+
+- name: Setup Nginx on multiple nodes
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install nginx
+      yum: 
+        name: nginx
+        state: present
+    
+    - name: Start nginx service
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+#Terraform - Create IAM Users and Policies 
+
+resource "aws_iam_user" "example_user" {
+    name = "pathnex_user"
+}
+
+resource "aws_iam_policy" "example_policy" {
+    name = "pathnex-policy"
+    description = "Policy for Pathnex application"
+    policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+            {
+                Action = "s3:ListBucket"
+                Effect = "Allow"
+                Resource = "arn:aws:s3:::pathnex-bucket"
+            },
+        ]
+    })
+}
+
+#Kubernetes- Deploy Nginx With ConfigMap and Secrets
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: nginx-config 
+data:
+    nginx.conf: |
+        server {
+            listen 80;
+            server_name localhost;
+            location / {
+                root /usr/share/nginx/html;
+                index index.html index.htm;
+            }
+        }
+
+---
+
+apiVersion: v1
+kind: Secret 
+metadata:
+    name: nginx-secret 
+type: Opaque
+data:
+    password: cGF0aG5leHBhc3M=
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: pathnex-nginx
+spec:
+    respicas: 2
+    selector:
+        matchLabels:
+            app: pathnex-nginx
+    template:
+        metadata:
+            labels:
+                app: pathnex-nginx
+    spec:
+        containers:
+            - name: nginx
+              image: nginx
+              volumeMounts:
+                - mountPath: /etc/nginx/nginx.conf 
+                  name: nginx-config
+                  subPath: nginx.conf 
+        volumes:
+            - name: nginx-config
+              ConfigMap:
+                name: nginx-config
+            - name: nginx-secret
+              secret:
+                secretName: nginx-secret 
+
+#Jenkinsfile - Multi-Branch Pipeline with Docker Build 
+
+pipeline {
+    agent any 
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    docker.build('pathnex-app')
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                script {
+                    kubectly apply -f Kubernetes/deployment.yaml
+                }
+            }
+        }
+    }
+}
+
+
+
+#Gitlab CI/CD - Advanced Deployment with Helm
+
+stages:
+    - build
+    - push
+    - deploy 
+
+build:
+    stage: build
+    script: 
+        - docker build -t pathnex-web-app .
+
+push:
+    stage: push
+    script: 
+        - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+        - docker push pathnex-web-app
+
+deploy:
+    stage: deploy
+    script:
+        - helm repo add pathnex https://charts.pathnex.com 
+        - helm install pathnex-nginx pathnex/nginx-ingress
+
+#Docker 
+# COPY vs ADD 
+
+COPY pathnex-file.txt /opt/pathnex/files/
+ADD pathnex.tar.gz /opt/pathnex/extracted/
