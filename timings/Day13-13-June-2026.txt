@@ -1,0 +1,11 @@
+#Today
+
+we go indpeth of k8s cluster and try to deploy
+the nginx application and its deploy to the
+eks cluster also we have faced some issue
+but we also tackle it
+
+#tomorrow
+
+by tomorrow we are going to explore more stuff
+of kubernetes services and there use case
