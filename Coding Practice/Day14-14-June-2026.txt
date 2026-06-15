@@ -1,0 +1,296 @@
+#Day - 14 - Mini Project 
+
+
+#Terraform - 1 create Ec2 instance
+
+provider "aws" {
+    region = "ap-south-1"
+}
+
+resource "aws_vpc" "main" {
+    cidr_block = "10.0.0.0/16"
+}
+
+resource "aws_subnet" "public" {
+    vpc_id = aws_vpc.main.id 
+    cidr_block = "10.0.0.0/24"
+    map_public_ip_on_launch = true
+}
+
+resource "aws_internet_gateway" "igw" {
+    vpc_id = aws_vpc.main.id
+}
+
+resource "aws_route_table" "rt" {
+    vpc_id = aws_vpc.main.id 
+    route {
+        cidr_block = "0.0.0.0/16"
+        gateway_id = aws_internet_gateway.igw.id
+    }
+}
+
+resource "aws_route_table_association" "rta" {
+    subnet_id = aws_subnet.public.id
+    route_table_id = aws_route_table.rt.id 
+} 
+
+resource "aws_security_group" "sg" {
+    vpc_id = aws.vpc.main.id 
+
+    ingress {
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_block = ["0.0.0.0/0"]
+    }
+
+    ingress {
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
+        cidr_block = ["0.0.0.0/0"]
+    }
+}
+
+resource "aws_instance" "ec2" {
+    ami = "ami-0f58b397bc5c1f2e8"
+    instance_type = "c5.xlarge"
+    subnet_id = aws_subnet.public.id
+    vpc_security_group_ids = [aws_security_group.sg.id]
+}
+
+#Ansible (nginx.yml)
+
+---
+- hosts: all
+  become: yes
+
+  tasks:
+    - name: Install nginx
+      yum:
+        name: nginx
+        state: present
+    
+    - name: Start nginx
+      service: 
+        name: nginx
+        state: started
+        enabled: yes
+    
+    - name: Deploy HTML
+      copy:
+        content: |
+            <html>
+            <body>
+            <h1>Hello from Ansible</h1>
+            </body>
+            </html>
+        dest: /usr/share/nginx/html/index.html
+
+#Kubernetes Deployment (deployment.yaml)
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: nginx-deployment
+
+spec:
+    replica: 2
+    selector:
+        matchLabels:
+            app: nginx
+    
+    template:
+        metadata: 
+            labels: 
+                app: nginx 
+    
+    spec: 
+        containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+
+
+Kubernetes Service (Service.yaml) 
+
+apiVersion: v1
+kind: Service
+metadata: 
+    name: nginx-service
+
+spec: 
+    selector:
+        app: nginx
+    
+    ports:
+        - port: 80
+          targetPort: 80
+    
+    type: NodePort
+
+#Shell Script (system-info.sh)
+
+#!/bin/bash
+
+echo "CPU Utilisation"
+lscpu
+
+echo
+echo "Memory Utilisation"
+free -h
+
+echo
+echo "Disk Utilisation"
+df -h
+
+## Jenkins Pipeline
+
+pipeline {
+    agent any 
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    triggers {
+        cron('H 2 * * *') // every day at 2 AM
+    }
+    stages (
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Pathnex/sample-java-app.git' 
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+    )
+}
+
+#GitLab CI - Scheduled Pipeline
+
+stages:
+    - build 
+
+build:
+    stage: build 
+    image: maven:3.8.1-jdk-17
+    script:
+        - git clone https://github.com/Pathnex/sample-java-app.git
+        - cd sample-java-app
+        - mvn clean package
+
+# L2 - Coding Practice
+
+#Ansible - Setup Nginx With Reverse Proxy 
+
+- name: Setup Nginx with Reverse Proxy 
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install nginx 
+      yum:
+        name: nginx 
+        state: present
+    - name: Configure nginx as reverse proxy 
+      template: 
+        src: reverse-proxy-conf.j2
+        dest: /etc/nginx/conf.d/reverse-proxy.conf 
+    - name: Restart nginx service
+      service: 
+        name: nginx
+        state: restarted
+        enabled: yes
+
+#Terraform - Create S3 Bucket With Versioning and logging
+
+resource "aws_s3_bucket" "pathnex_bucket" {
+    bucket = "pathnex-bucket"
+    versioning {
+        enabled = true
+    }
+    logging {
+        target_bucket = "pathnex-log-bucket"
+        target_prefix = "logs/"
+    }
+}
+
+#Kubernetes - ingress with Nginx Controller 
+
+apiVersion: networking.k8s.io/v1
+kind: ingress
+metadata:
+    name: pathnex-ingress
+    annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+
+spec: 
+    rules:
+        - host: pathnex.local
+          http:
+            paths:
+                -path: /
+                 pathType: Prefix 
+                 backend:
+                    service:
+                        name: pathnex-service 
+                        port:
+                            number: 80
+
+#Jenkinsfile - Build, Test and Deploy with Stages
+
+pipeline {
+    agent any 
+    stage {
+        stage('Build') {
+            steps {
+                echo 'Building Docker Image...'
+                docker.build('pathnex-web-app')
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Running Tests....'
+            }
+        }
+        stage('Deplou To Kubernetes') {
+            steps {
+                script {
+                    sh 'kubectl apply -f kubernetes/deployment.yaml'
+                }
+            }
+        }
+    }
+}
+
+#GitLab CI/CD - Multi-Stage Deployment with Helm
+
+stages:
+    - build
+    - push
+    - deploy 
+
+build:
+    stage: build
+    script:
+        - docker build -t pathnex-web-app .
+ 
+push:
+    stage: push 
+    script:
+        - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+        - docker push pathnex-web-app
+
+deploy:
+    stage: deploy
+    script:
+        - helm upgrade --install pathnex-nginx pathnex/nginx-ingress
+
+#Docker 
+#CMD VS ENTRYPOINT
+
+FROM ubuntu
+ENTRYPOINT ["echo"]
+CMD ["Hello Pathnex"]
