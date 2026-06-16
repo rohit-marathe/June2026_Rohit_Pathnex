@@ -1,0 +1,11 @@
+#Today
+
+we have covered the helm charts in k8s
+and go indpeth why its been use instead of
+traditional k8s deloyment.
+
+
+#Tomorrow
+
+as per the roadmap we are going to head to argocd
+which is the gitops to use continous delivery.
