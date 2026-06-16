@@ -1,0 +1,9 @@
+#Today
+
+there is no sesion but i look into the eks
+and understand the flow and how to create it and setup it
+
+#tomorrow
+
+by tomorrow we explore the reaming topic
+of k8s probaly pv pvc or may be others

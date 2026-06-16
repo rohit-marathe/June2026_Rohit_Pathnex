@@ -1,0 +1,10 @@
+#Today
+
+today session is very jam pack lots of 
+troubleshooting and deep dive into eks cluster
+
+
+#Tomorrow
+
+some topic is reaming in k8s that will be 
+cover in next session
