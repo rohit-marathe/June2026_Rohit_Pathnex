@@ -1,0 +1,11 @@
+#Today
+
+in the moring session we have learned about the
+terraform which is IAC (Infrastrcture as a code) tool
+that used to create Infrastrcture by writing
+with multi cloud platform.
+
+#Tomorrow 
+
+by Tomorrow we are going to head out to the practical
+session of terraform where we can create the Infrastrcture.

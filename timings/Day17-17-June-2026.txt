@@ -1,0 +1,12 @@
+#Today
+In the morning session we have learned about
+argocd tool that is gitops how it helps for
+continues deployment and follows the git as 
+single source of truth.
+
+#Tomorrow
+
+As per the roadmap by Tomorrow are going to head out
+with terraform that is IAC tool which mean 
+Infrastructure as a code that helps to create and manage Infrastructure
+using code.
