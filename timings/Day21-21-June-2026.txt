@@ -1,0 +1,11 @@
+#Today 
+
+in the morning session we have intensive deep
+dive into CI/CD pipeline with jenkins and got to 
+know how to setup jenkins with ansible and terrafrom.
+
+#Tomorrow
+as per the roadmap we are looking for monitoring
+where we know like how the monitoring will work.
+
+
