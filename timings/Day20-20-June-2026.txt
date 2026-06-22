@@ -1,0 +1,13 @@
+#Today 
+ we have explored about the Ansible
+ which is the configuration Management tool
+ in simple term its used to manage multiple
+ server from 1 single and work on mater and worker
+ node architecture.
+
+
+ #Tomorrow
+
+As per the roadmap we are going to heading out to
+CI/CD tha know as continous integration and continous delivery by using 
+tools like Gitlab and Jenkins.

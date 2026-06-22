@@ -1,0 +1,228 @@
+# Day - 21 
+
+# Ansible
+---
+- name: Install and start Nginx
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Start and enable nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+#Terraform - Create EC2 
+
+resource "aws_instance" "Pathnexec2" {
+    ami = "ami-id123"
+    instance_type = "t2.micro"
+    region = "ap-south-1"
+}
+
+# Kubernetes Deployment with 3 Replicas
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+    name: nginx-app
+
+spec:
+    replicas: 3
+    selector:
+        matchLabels
+            app: nginx-app 
+    
+    template:
+        metadata:
+            labels:
+                app: nginx-app 
+    spec:
+     containers:
+     - name: nginx-app 
+       image: nginx:latest
+       ports:
+       - containerPort: 80
+
+# Shell Script 
+#!/bin/bash
+
+date
+uptime
+df -h
+
+# Jenkins Pipeline - Deploy to Multiple Environment
+
+pipeline {
+    agent any
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    stages {
+        stage('Deploy to Dev') {
+            steps {
+                sh 'echo "Deploying $INSTITUTE_NAME to Dev Environment"'
+            }
+        }
+        stage('Deploy to stagging') {
+            steps {
+                input message: "Approve Staging Deployment ?"
+                sh 'echo "Deploying $INSTITUTE_NAME to staging environment"'
+            }
+        }
+        stage('Deploy to Prod') {
+            steps {
+                input message: "Approve Prod Deployment"
+                sh 'echo "Deploying $INSTITUTE_NAME to Prod environment"'
+            }
+        }
+    }
+}
+
+#Gitlab CI - Multi Environment
+
+stages:
+    - Deploy
+variables:
+    INSTITUTE_NAME: "Pathnex"
+
+deploy-dev:
+    stage: deploy
+    image: alpine:latest
+    script:
+        - echo "Deploying $INSTITUTE_NAME to dev environment"
+
+deploy-stagging:
+    stage: deploy
+    image: alpine:latest
+    script:
+        - echo "Deploying $INSTITUTE_NAME to stagging environment"
+    when: manual
+
+deploy-prod:
+    stage: deploy 
+    image: alpine:latest 
+    script:
+        - echo "Deploying $INSTITUTE_NAME to Prod environment"
+    when: manual
+
+
+# L2 - Coding Practice 
+
+#Ansible - Backup and Restore Files
+
+- name: Backup and Restore Files
+  hosts: all
+  become: yes
+  tasks:
+    - name: Create backup of /etc directory
+      command: tar -czvf /tmp/etc-backup.tar.gz /etc
+    - name: Copy Backup to Remote Server 
+      copy:
+        src: /tmp/etc-backup.tar.gz
+        dest: /tmp/etc-backup.tar.gz
+    - name:
+      command: tar -xzvf from remote server 
+
+# Terraform - Create S3 Bucket With Cross-Region Replication 
+
+resource "aws_s3_bucket" "Pathnex_bucket" {
+    bucket = "pathnex-backup-bucket"
+    region = "us-east-1"
+
+    versioning {
+        enabled = true 
+    }
+}
+
+resource "aws_s3_bucket" "pathnex_backup_bucket_eu" {
+    bucket = "pathnex-backup-bucket-eu"
+    region = "eu-east-1"
+
+    versioning {
+        enabled = true
+    }
+}
+
+resource "aws_s3_bucket_object" "pathnex_backup_file" {
+    bucket = aws_s3_bucket.pathnex_bucket.bucket
+    key = "backup.tar.gz"
+    source = "pathnex-backup-tar.gz"
+}
+
+#Kubernetes - Diaster Recovery With Persistent Volumes
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: pathnex-statefulset 
+spec:
+    serviceName: "Pathnex"
+    replicas: 3
+    selector:
+        matchLabels:
+            app: pathnex
+    template:
+        metadata: 
+            labels:
+                app: pathnex 
+    VolumeClaimTemplates:
+        - metadata:
+            name: web-content 
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            resource:
+                requests:
+                    storage: 5Gi
+
+# Jenkinsfile - Backup Stragegy for Jenkins Workspace
+
+pipeline {
+    agent any
+    stages {
+        stage('Backup') {
+            steps {
+                echo 'Backing up Jenkins workspace...'
+                sh 'tar -czvf /tmp/jenkins-backup.tar.gz ${WORKSPACE}'
+            }
+        }
+        stage('Restore') {
+            steps {
+                echo 'Restoring Jenkins workspace'
+                sh 'tar -xzvf /tmp/jenkins-backup.tar.gz -C ${WORKSPACE}'
+            }
+        }
+    }
+}
+
+# Gitlab CI/CD - Backup and Restore Deployment Files 
+
+stages:
+    - backup
+    - restore 
+
+backup:
+    stage: backup 
+    script:
+        - tar -czvf /tmp/backup.tar.gz kubernetes/deployment.yaml 
+
+restore:
+    stage: restore
+    script:
+        - tar -xzvf /tmp/backup.tar.gz -C kubernetes/
+
+# Docker - Docker Compose
+
+version: '3'
+services:
+    web:
+     image: nginx
+     container_name: pathnex-nginx
+     ports:
+        - "80:80"

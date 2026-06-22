@@ -1,0 +1,213 @@
+# Day 20
+
+#Ansible - Broken 
+
+# Correct Ansible
+
+- name: Install stuff
+  hosts: all
+  tasks:
+    - name: install 
+      yum:
+       name: httpd
+       state: present
+
+What i Fixed:
+
+1-Added missing : after hosts, name, and state.
+2-Corrected -name to - name.
+3-Fixed YAML indentation under tasks and yum.
+4-Ensured proper Ansible/YAML syntax throughout.
+
+# Terraform - Fixed
+
+resource "aws_instance" "Bad" {
+    ami = "ami-123"
+    instance_type = "c6i.8xlarge"
+}
+
+
+What i Fixed:
+
+1-Added quotes around resource type and name.
+2-Added = for attribute assignments.
+3-Added quotes around string values.
+4-Fixed formatting/indentation.
+
+# Kubernetes Fixed
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+    metadata: broken-app
+
+spec:
+    replicas: 3
+    selector:
+      matchLabels:
+        app: broken
+    template:
+      metadata:
+        labels:
+          app: broken
+    spec:
+        containers:
+        - name: app
+          image: nginx
+
+What i Fixed:
+
+1-Added missing : after apiVersion, replicas, and other keys.
+2-Fixed indentation throughout the manifest..
+3-Corrected -name to - name.
+4-Added proper YAML structure under selector, template, and containers.
+
+# Secrets & Credentials
+
+#Jenkins Pipeline - Using Credentials
+
+pipeline {
+    agent any 
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Pathnex/sample-java-app.git'
+            }
+        }
+        stage('Use Secret') {
+            steps {
+                withCredentials([string(credentialsId: 'PATHNEX_API_KEY', varible: 'API_KEY')]) {
+                    sh 'echo "Using secret $API_KEY for $INSTITUTE_NAME"'
+                }
+            }
+        }
+    }
+}
+
+
+# Gitlab CI - Using CI/CD Varibles 
+
+stages:
+    - build 
+
+varibles:
+    INSTITUTE_NAME: "Pathnex"
+    API_KEY: "PLACEHOLDER_SECRET"
+
+build:
+    stage: build
+    image: alpine:latest
+    script:
+        - echo "Using secret $API_KEY for $INSTITUTE_NAME"
+
+
+# L2 - Coding Practice 
+
+# Ansible - Configure Firewall with iptables
+
+- name: Configure Firewall with iptables
+  hosts: all 
+  become: yes
+  tasks:
+    - name: Set default policies to drop all traffic
+      command: iptables -P INPUT DROP 
+    - name: Allow SSH and HTTP traffic 
+      command: iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+      command: iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+    - name: Save iptables configuration 
+      command: service iptables save
+
+# Terraform - Configure Security Groups For EC2
+
+resource "aws_security_group" "pathnex_sg" {
+    name_prefix = "Patnex-sg-"
+    description = "Allow SSH and HTTP"
+
+    ingress {
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_block = ["0.0.0.0/0"]
+    }
+    
+    ingress {
+        from_port = 80
+        to_port = 80
+        protocol = "tcp"
+        cidr_block = ["0.0.0.0/0"]
+    }
+}
+
+#Kubernetes - RBAC Configuration for Access Control 
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+    name: pathnex-cluster-admin
+subjects:
+    - kind: User
+      name: pathnex-user 
+      apiGroup: rbac.authorization.k8s.io 
+roleRef:
+    kind: ClusterRole 
+    name: cluster-admin 
+    apiGroup: rbac.authorization.k8s.io
+
+#Jenkinsfile - Secure Credentials Management 
+
+pipeline {
+    agent any 
+    environment {
+        REGISTRY_PASSWORD = credentials('docker-registry-pasword')
+    }
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building Docker Image...'
+                docker.build('pathnex-web-app')
+            }
+        }
+        stage('Push') {
+            steps {
+                script {
+                    docker.withRegistry('https://docker.io', 'docker-credentials') {
+                        docker.image('pathnex-web-app').push('latest')
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+#Gitlab CI/CD - Secure Deployment with Secrets Management
+
+stages:
+    - build 
+    - push
+    - deploy
+
+build:
+    stage: build 
+    script:
+        - docker build -t pathnex-web-app .
+push:
+    stage: push 
+    script:
+        - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+        - docker push pathnex-web-app
+
+deploy:
+    stage: deploy 
+    script:
+        - kubectl apply -f kubernetes/deployment.yaml 
+        - kubectl get pods --watch 
+    
+# Docker Networkign
+
+docker network create pathnex-network 
+docker run -dit --name c1 --network pathnex-network ubuntu 
+docker run -dit --name c2 --network pathnex-network ubuntu 
