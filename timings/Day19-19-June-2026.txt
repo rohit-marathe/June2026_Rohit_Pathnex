@@ -1,0 +1,16 @@
+#Today 
+
+Today we have explored how to write code 
+in terraform to provision infrastructure 
+also we learnt how to mantain state manage
+using aws dynamodb which is db for storing 
+values.
+
+
+#Tomorrow
+
+By Tomorrow we are going to heading out the 
+ansible which is configuration management tool
+that is used for management of servers like 
+if you have 100 servers if you want to update then
+you can manage form 1 single ansible server.
