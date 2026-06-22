@@ -1,0 +1,254 @@
+# Day 22 
+
+# Ansible - Use Handler onn Config Changes
+
+---
+- name: Configure Nginx for Pathnex
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Copy Nginx Config 
+      copy:
+        dest: /etc/nginx/nginx.conf 
+        content: |
+            user nginx;
+            worker_processes auto;
+      notify: Restart nginx 
+
+  handlers:
+    - name: Restart nginx
+      service:
+        name: nginx
+        state: restarted
+
+#Terraform - Security Group
+
+resource "aws_resource_group" "PathnexSG" {
+    name = "pathnex-sg"
+    vpc_id = aws_vpc.PathnexVPC.id 
+
+    ingress {
+        from_port = 80
+        to_port = 80
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    tags = {
+        Name = "Pathnex-SG"
+    }
+}
+
+# Kubernetes - DaemonSet
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+    name: pathnex-daemon 
+spec:
+    selector:
+        matchLabels:
+            app: ds 
+    template: 
+        metadata:
+            labels:
+                app: ds 
+    spec:
+        containers:
+            - name: monitor
+              image: busybox
+              command: ["sh", "-c", "While true; do echo Pathnex Node Monitor; sleep 20; done"]
+
+# Shell Script - Monitor Disk Usage
+
+#!/bin/bash 
+
+USAGE=$(df -h / | tail -1 | awk '{print $5}')
+
+echo "Disk Usage: $USAGE"
+
+# Jenkins Pipeline - Trigger on Git Tag 
+
+pipeline {
+    agent any 
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+        TEAM = "DevOps"
+        ENV = "Prod"
+    }
+    trigger {
+        pollSCM('H/15 * * * *')
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Pathnex/sample-java-app.git', branch: 'main'
+            }
+        }
+        stage('Build') {
+            when {
+                buildingTag()
+            }
+            steps {
+                sh 'echo "Building $INSTITUTE_NAME app for $TEAM team in $ENV environment"'
+            }
+        }
+    }
+}
+
+# Gitlab CI 
+
+stages:
+    - build 
+
+variables:
+    INSTITUTE_NAME: "Pathnex"
+    TEAM: "DevOps"
+    ENV: "prod"
+
+build:
+    stage: build
+    image: maven:3.8.1-jdk-17
+    script:
+        - echo "Building $INSTITUTE_NAME app for $TEAM team in $ENV environment"
+only:
+    - tags
+
+# L2 - Coding Practice 
+
+#Ansible - Deploy Nginx Across Multiple Kubernetes Clusters
+
+- name: Deploy Nginx across multiple kubernetes clusteres 
+  hosts: localhost
+  tasks:
+    - name: Configure kubectl for cluster 1
+      command: kubectl --context=us-east config use-context us-east-cluster 
+    - name: Deploy Nginx on Cluster 1
+      command: kubectl apply -f kubernetes/deployment.yaml 
+    - name: Configure kubectl for cluster 2
+      command: kubectl --context=us-west config use-context use-west-cluster 
+    - name: Deploy Nginx on Cluster 2 
+      command: kubectl apply -f kubernetes/deployment.yaml
+
+# Terraform - Multi-Region Kubernetes Cluster with EKS and GKE 
+
+resource "aws_eks_cluster" "pathnex_eks" {
+    name = "pathnex-eks-cluster"
+    role_arn = "aws_iam_role.aws_eks_cluster.role.arn"
+
+    vpc_config {
+        subnet_ids = [aws_subnet.pathnex_subnet.id]
+    }
+    depends_on = [aws_iam_role_policy_attachment.eks_cluster_role_policy]
+}
+
+resource "google_container_cluster" "pathnex_gke" {
+    name = "pathnex-gke-cluster"
+    location = "us-central-a"
+    initial_node_count = 3
+    node_config {
+        machine_type = "n1-standard-1"
+    }
+}
+
+# Kubernetes - Federated Deployment with Multiple Clusters 
+
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+    name: pathnex-deployment 
+
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: pathnex-app 
+
+    template:
+        metadata:
+            labels:
+                app: pathnex-app 
+    
+    spec:
+        containers:
+            - name: nginx
+              image: nginx 
+              ports: 
+                - containerPort: 80
+
+---
+apiVersion: federation.k8s.io/v1beta1
+kind: FederationDeployment
+metadata:
+    name: pathnex-federated-deployment
+    namespace: default 
+
+spec:
+    template:
+        spec:
+         replicas: 3
+         selector:
+            matchLabels:
+                app: pathnex-app
+         template:
+            metadata:
+                labels:
+                    app: pathnex-app
+                                     
+         spec:
+            containers:
+                - name: nginx 
+                  image: nginx
+                  ports: 
+                    - containerPort: 80
+        
+# Jenkinsfile - Multi-Cluster Deployment Strategy
+
+pipeline {
+    agent any
+    stages {
+        stage('Deploy to Cluster 1') {
+            steps {
+                script {
+                    sh 'kubectl --context=us-east-cluster apply -f kubernetes/deployment.yaml'
+                }
+            }
+        }
+        stage('Deploy to Cluster 2') {
+            steps {
+                script {
+                    sh 'kubectl --context=us-west-cluster apply -f kubernetes/deployment.yaml'
+                }
+            }
+        }
+    }
+}
+
+# Gitlab CI/CD - Multi Cluster Deployment Strategy
+
+stages:
+    - deploy
+
+deploy_cluster_1:
+    stage: deploy 
+    script:
+        - kubectl --context=us-east-cluster apply -f kubernetes/deployment.yaml 
+
+deploy_cluster_2:
+    stage: deploy
+    script: 
+        - kubectl --context=us-west-cluster apply -f kubernetes/deployment.yaml 
+
+# Docker - Compose with MySQL 
+
+version: '3'
+services:
+    db:
+        image: mysql:8
+        container_name: pathnex-db
+        environment:
+            MYSQL_ROOT_PASSWORD: root 
+    web:
+        image: nginx 
+        container_name: pathnex-web 
+        
