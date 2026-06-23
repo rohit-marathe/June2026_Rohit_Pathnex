@@ -1,0 +1,12 @@
+# Today
+
+Today i have explored the different different
+CI/CD tools like gitlab and github actions and nowadays
+this are very popular.
+
+# Tomorrow
+ 
+we have finish the CI/CD and as per the roadmap
+we are going to head out to monitoring and explore tools like
+prometheus, grafana , datadog , elk and many more.
+
