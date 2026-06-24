@@ -1,0 +1,12 @@
+# Today
+
+Today again we are deep dive into the monitoring but 
+with ELK that stand for Elasticsearch, Logstash, and Kibana
+that is alternate for prometheus and grafana and its 
+very powerful and popular.
+
+
+# Tomorrow 
+
+As per the roadmap may be by tomorrow we are going to deep
+dive into - Kafka / MSK / Confluent.
