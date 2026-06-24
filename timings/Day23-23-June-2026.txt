@@ -1,0 +1,12 @@
+# Today
+
+In the morning session we have go indepth in 
+monitoring of eks cluster using Prometheus and grafana.
+Where Prometheus is collecting all metrics and send to grafana 
+where you can visualise that data in charts graph and also you 
+can create your own dashboard.
+
+#Tomorrow
+
+As per the roadmap may be by tomorrow we are going to deep
+dive into - Kafka / MSK / Confluent.
