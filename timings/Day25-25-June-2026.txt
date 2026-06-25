@@ -1,0 +1,11 @@
+# Today 
+
+In the morning session we have learned about the kafka.
+so kafka is distributed event streaming platform used to capture, store, and process high-volume, real-time data streams.
+in simple words its Kafka operates on a publish-subscribe messaging model.
+
+
+# Tomorrow 
+
+As per the roadmap we are going to learn about
+what is ssl certificate what is type and how its work and created. 
