@@ -1,0 +1,9 @@
+# Today
+
+In the morning session we have learned about the SRE roles and how its traditional
+devops engineer is different from SRE.
+
+# Tomorrow 
+
+As per roadmap by tomorrow we are going to deep dive into the ssl certificate and different
+types of SSL certificate and how its useful.
