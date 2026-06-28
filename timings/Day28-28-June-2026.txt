@@ -1,0 +1,11 @@
+# Today
+ 
+In the morning session we have learnt about 
+sceanrio based questions and answers for interview
+and what is the day to day life of a devops engineer.
+
+# Tomorrow
+
+by Tomorrow we are going to learn about the 
+testing releated things and tools that has to be 
+used as devops engineer.
