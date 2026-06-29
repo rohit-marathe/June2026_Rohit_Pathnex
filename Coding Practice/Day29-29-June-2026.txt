@@ -1,0 +1,372 @@
+# Day 29 - Rea World Mini Project
+
+# Terraform 
+
+resource "aws_key_pair" "pathnex-server" {
+    key_name = "pathnex-key"
+    public_key = file("~/.ssh/id_rsa.pub")
+}
+
+resource "aws_security_group" "pathnex-sg" {
+    name = "pathnex-group"
+
+    ingress {
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    egress {
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+}
+
+resource "aws_instance" "pathnex-ec2" {
+    ami = "ami-0ad21f4f013d395d3"
+    instance_type = aws_key_pair.pathnex.key_name
+    vpc_security_group_ids = [aws_security_group.pathnex-group.id]
+
+    tags = {
+        Name = "Pathnex-EC2"
+    }
+}
+
+resource "aws_ebs_volume" "pathnex-ebs" {
+    availability_zone = aws_instance.pathnex-ec2.availability_zone
+    size = 20
+}
+
+resource "aws_ebs_volume_attachment" "attach" {
+    device_name = "/dev/sdf"
+    volume_id = aws_ebs_volume.pathnex-ebs.id 
+    instance_id = aws_instance.pathnex-ec2.id 
+}
+
+output "public_ip" {
+    value = aws_instance.pathnex-ec2.public_ip
+}
+
+
+# Ansible 
+
+-- name: nginx-server
+   hosts: all 
+
+   tasks:
+    - apt:
+        name: nginx
+        state: present 
+    
+    - shell: echo "<h1>Welcome to Pathnex</h1>" > /var/www/html/index.html 
+
+    - service:
+        name: nginx
+        state: started
+        enabled: yes 
+
+# Kubernetes - Deployment  
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: nginx-deployment 
+
+spec:
+    selector:
+        matchLabels:
+            app: nginx-app 
+    template:
+        metadata:
+            labels:
+                app: nginx-app
+    spec:
+        containers:
+            - name: nginx-app
+              image: nginx:latest 
+              ports:
+                - ContainerPort: 80
+
+---
+# Kubernetes - Service 
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: nginx-svc 
+
+spec:
+    type: NodePort 
+
+    selector:
+        app: nginx-app
+    
+    ports:
+        - protocol: tcp
+          port: 80
+          targetPort: 80
+          nodePort: 30080
+
+--- 
+
+# Kubernetes - PersistentVolume (PV)
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: nginx-pv 
+
+spec:
+    capacity:
+        storage: 1Gi
+    accessModes:
+        - ReadWriteOnce
+    persistentVolumeReclaimPolicy: Retain 
+
+    hostPath:
+        path: /data/nginx 
+
+---
+
+# Kubernetes - PersistentVolumeClaim (PVC)
+
+apiVersion: v1
+kind: PersistentVolumeClaim 
+metadata:
+    name: nginx-pvc 
+
+spec:
+    accessModes:
+        - ReadWriteOnce
+    
+    resource:
+        requests:
+            storage: 1Gi
+
+# Shell Script - print system checks
+
+
+#!/bin/bash 
+
+echo "CPU Usage:"
+top -bn1 | grep "Cpu(s)"
+
+echo "Memory Usage"
+free -h 
+
+echo "Disk Usage:"
+df -h 
+
+echo "IP Address:"
+hostname: -I 
+
+echo "Top Process:"
+ps -eo pid,comm,%cpu --sort=-%cpu | head -n 6
+
+
+
+# Jenkins Pipeline 
+
+pipeline {
+    agent any 
+
+    environmet {
+        INSTITUTE_NAME = "Pathnex"
+        TEAM = "DevOps"
+        ENV = "prod"
+        PROJECT = "Pathnex-Training"
+    }
+
+    stages {
+        stage('Infrastructure') {
+            steps {
+                sh '''
+                    echo "Applying Terraform..."
+                    terraform init 
+                    terraform apply -auto-approve
+            }
+        }
+        stage('App Deployment') {
+            steps {
+                sh '''
+                    echo "Running Ansible Playbooks..."
+                    ansible-playbook -i inventory deploy.yml 
+
+                    echo "Applying Kubernetes manifests..."
+                    kuebctl apply -f k8s/
+                ''' 
+            }
+        }
+        stage('Monitoring checks') {
+            steps {
+                sh '''
+                    echo "CPU Usage:"
+                    top -bn1 | grep "Cpu(s)"
+
+                    echo "Memory Usage:"
+                    free -h 
+
+                    echo "Disk Usage:"
+                    hostname -I 
+
+                    echo "Top Process:"
+                    ps -eo pid,comm,%cpu --sort=-%cpu | head -n 6
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline executed for ${PROJECT} by ${TEAM} at ${INSTITUTE_NAME} in ${ENV} environmet"
+        }
+    }
+}
+
+
+# Gitlab CI/CD 
+
+stages:
+    - infrastructure 
+    - app_deployment 
+    - monitoring_checks
+
+variables:
+    INSTITUTE_NAME: "Pathnex"
+    TEAM: "DevOps"
+    ENV: "prod"
+    PROJECT: "Pathnex-Training"
+
+infrastructure:
+    stages: infrastructure
+    script:
+        - echo "Running Terraform..."
+        - terraform init 
+        - terraform apply -autp-approve 
+
+app_deployment:
+    stage: app_deployment
+    script:
+        - echo "Running Ansible playbook..."
+        - ansible-playbook -i inventory deploy.yml 
+        - kuebctl apply -f k8s/
+
+monitoring_checks:
+    stages: monitoring_checks
+    script:
+        - echo "CPU Usage:"
+        - top -bn1 | grep "Cpu(s)"
+        
+        - echo "Memory Usage:"
+        - free -h 
+
+        - echo "Disk Usage:
+        - df -h 
+
+        - echo "IP Address:"
+        - hostname -i
+
+        - echo "Top Process:" 
+        - ps -eo pid,comm,%cpu --sort=-%cpu | head -n 6
+
+
+# L2 - Coding Practice 
+
+# Ansible 
+
+- name: Complete Deployment Setup 
+  hosts: all
+  become: yes
+  tasks:
+    - name: Deploy Nginx, MySQL, and Redis with Docker 
+      command: docker-compose -f /path/to/docker-compose.yml up -d 
+
+# Terraform - Provisioning Multi-Tier Application with VPC and Security 
+
+resource "aws_vpc" "pathnex_vpc" {
+    cidr_block = "10.0.0.0/16"
+}
+
+resource "aws_instance" "pathnex_app" {
+    ami = "ami-0abcd1234abcd1234"
+    instance_type: "t2.medium"
+    subnet_id = aws_subnet.pathnex_subnet.id
+    security_groups = [aws_security_group.pathnex_sg.name]
+}
+
+# Kubernetes - Deploy Full Application Stack 
+
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+    name: pathnex-app
+
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: pathnex-app
+    template:
+        metadata:
+            labels:
+                app: pathnex-app 
+        spec:
+            containers:
+                - name: nginx 
+                  image: nginx
+                  ports:
+                    - containersPort: 80 
+
+---
+# Kubernetes - Service 
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: pathnex-service 
+
+spec:
+    selector:
+        app: pathnex-app 
+    ports:
+        - port: 80
+          targetPort: 80 
+
+# Docker - Docker Security & Cleanup
+
+FORM nginx 
+RUN user add pathnexuser
+USER pathnexuser
+
+# Commands
+
+docker container prune 
+docker images prune 
+docker volume prune 
+docker network prune 
+docekr system prune -a 
+
+# Final Docker Project 
+
+version: '3'
+services:
+    frontend:
+        image: nginx
+        container_name: pathnex-frontend
+        ports:
+            - "80:80"
+
+    backend:
+        build: ./backend
+        container_name: pathnex-backend
+        ports:
+            - "5000:5000"
+        
+    database:
+        image: mysql:8
+        container_name: pathnex-mysql 
+        environmet:
+            MYSQL_ROOT_PASSWORD: root 

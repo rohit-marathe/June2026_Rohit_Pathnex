@@ -1,0 +1,10 @@
+# Today
+
+Today we have our last session where we have learned
+about difference type of testing tools that we have 
+to used as day to day lifecycle of devops engineer.
+
+# Tomorrow
+
+By Tomorrow we have kind of send off of our june
+and orientation of july batch.
