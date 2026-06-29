@@ -1,0 +1,10 @@
+# Today
+
+Today in the morning session we have explored ssl certificate and different
+types of SSL certificate and how its useful.
+
+# Tomorrow
+
+By tomorrow we are going to discuss about the different
+scenario based questions and answers.
+
