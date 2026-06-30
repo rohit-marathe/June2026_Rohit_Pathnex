@@ -1,0 +1,408 @@
+# Day 30
+
+---
+- name: Create User and Configure SSH 
+  hosts: all
+  become: true
+
+  vars:
+    ssh_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDxxxxxxxxxxxxxxxx"
+  
+  tasks:
+    - name: Create User
+      user:
+        name: pathnex-admin
+        shell: /bin/bash 
+        create_home: yes
+        state: present 
+
+    - name: Add SSH Key 
+      authorized_key:
+        user: pathnex-admin
+        key: "{{ ssh_public_key }}"
+
+# Terraform - EC2
+
+provider "aws" {
+    region = "ap-south-1"
+}
+
+resource "aws_instance" "ec2" {
+    ami = "ami-xxxxxx"
+    instance_type = "t2.micro"
+
+    tags = {
+        Project = "Pathnex-Training"
+    }
+}
+
+# Kubernetes - Deployment.yaml
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: pathnex-app 
+
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: pathnex-app 
+    template:
+        metadata:
+            labels:
+                app: pathnex-app 
+        spec:
+            containers:
+                - name: nginx 
+                  image: nginx 
+                  ports:
+                    - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: pathnex-service 
+spec:
+    selector:
+        app: pathnex-app 
+    ports:
+        - port: 80
+          targetPort: 80 
+    tyep: clusterIP
+
+# Shell Script - Menu.sh 
+
+#!/bin/bash 
+
+echo "1) IP"
+echo "2) Disk"
+echo "3) Memory"
+read -p "Enter choice: " choice 
+
+case $choice in 
+1) hostname -I ;; 
+2) df -h ;;
+3) free -h ;;
+*) echo "Invalid choice" ;;
+
+esac
+
+# Jenkinsfile - 
+
+pipeline {
+    agent any 
+    
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+        TEAM = "DevOps"
+        ENV = "prod"
+        PROJECT = "Pathnex-Training"
+    }
+    stages {
+        stage('Infrastructure') {
+            steps {
+                sh '''
+                terraform init
+                terraform apply -auto-apporve
+            }
+        }
+        stage('App Deployment') {
+            steps {
+                sh '''
+                ansible-playbook playbook.yml 
+                kubectl apply -f deployment.yml
+            }
+        }
+        stage('Monitoring Checks') {
+            steps {
+                sh '''
+                hostname -I 
+                df -h 
+                free -h 
+                '''
+            }
+        }
+    }
+}
+
+# Gitlab CI/CD 
+
+stages:
+    - infrastructure
+    - app_deployment 
+    - monitoring_checks
+
+variables:
+    INSTITUTE_NAME: "Pathnex"
+    TEAM: "DevOps"
+    ENV: "prod"
+    PROJECT: "Pathnex-Training"
+
+infrastructure:
+    stage: infrastructure
+    script:
+        - terraform init 
+        - terraform apply -auto-apporve
+
+app_deployment:
+    stage: app_deployment
+    script:
+        - ansible-playbook playbook.yml 
+        - kubectl apply -f deployment.yml 
+
+monitoring_checks:
+    stage: monitoring_checks
+    script:
+        - hostname -I 
+        - df -h 
+        - free -h 
+
+# Day 30 
+
+# Terraform - main.tf 
+
+provider "aws" {
+    region = "ap-south-1"
+}
+
+resource "aws_vpc" "pathnex" {
+    cidr_block = "10.0.0.0/16"
+
+    tags = {
+        Name = "Pathnex-VPC"
+    }
+}
+
+resource "aws_subnet" "public" {
+    vpc_id = aws_vpc.pathnex.id 
+    cidr_block = 10.0.0.0/24
+    availability_zone = "ap-south-1a"
+    map_public_ip_on_launch = true 
+}
+
+resource "aws_security_group" "web" {
+    name = "pathnex-sg"
+    vpc_id = aws_vpc.pathnex.id 
+
+    ingress {
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_block = ["0.0.0.0/0"]
+    }
+
+    ingress {
+        from_port = 80
+        to_port = 80
+        protocol = "tcp"
+        cidr_block = ["0.0.0.0/0"]
+    }
+
+    egress {
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
+        cidr_block = ["0.0.0.0/0"]
+    }
+}
+
+resource "aws_instance" "app" {
+    ami = "ami-xxxxxxxx"
+    instance_type = "t2.micro"
+    subnet_id = aws_subnet.public.id 
+    vpc_security_group_ids = [aws_security_group.web.id]
+
+    tags = {
+        Name = "Pathnex-Server"
+        Project = "Pathnex"
+    }
+}
+
+resource "aws_db_instance" "db" {
+    identifier = "pathnex-db"
+    allocated_storage = 20 
+    engine = "mysql"
+    engine_version = "8.0"
+    instance_class = "db.t3.micro"
+    username = "admin"
+    password = "password123!"
+    skip_final_snapshot = true 
+}
+
+# Kubernetes Deployment
+
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+    name: pathnex-app 
+spec:
+    replicas: 3
+    selector: 
+        matchLabels:
+            app: pathnex
+    template:
+        metadata:
+            labels:
+                app: pathnex
+        spec:
+            containers:
+                - name: app 
+                  image: nginx:latest
+                  ports:
+                    - containerPort: 80 
+
+---
+
+apiVersion: v1
+kind: Service
+metadata: 
+    name: pathnex-service
+spec:
+    selector:
+        app: pathnex
+    ports:
+    - port: 80
+      targetPort: 80
+    type: LoadBalancer
+
+# Bash 
+
+helm create pathnex 
+helm instal pathnex ./pathnex 
+helm upgrade pathnex ./pathnex 
+
+# Jenkins Pipeline 
+
+pipeline {
+    agent any 
+
+    environment {
+        PROJECT = "Pathnex"
+        ENV = "Prod"
+    }
+    stages {
+        
+        stage('Terraform') {
+            steps {
+                sh '''
+                terraform init 
+                terraform apply -auto-apporve
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'docker build -t pathnex:latest .'
+            }
+        }
+        stage('Push Image') {
+            steps {
+                sh 'docker push <dockerhub-user>/pathnex:latest'
+            }
+        }
+        stage('Deploy Kubernetes') {
+            steps {
+                sh '''
+                kubectl apply -f deployment.yml
+                helm upgrade --install pathnex ./pathnex 
+            }
+        }
+        stage('Monitoring') {
+            steps {
+                sh '''
+                kubectl get pods
+                kubectl get svc 
+                kubectl top pods 
+                '''
+            }
+        }
+    }
+}
+
+
+# Gitlab CI / CD 
+
+stages:
+    - infrastructure
+    - build 
+    - deploy 
+    - monitor 
+
+variables:
+    PROJECT: "Pathnex"
+    ENV: "prod"
+
+infrastructure:
+    stage: infrastructure
+    script:
+        - terraform init 
+        - terraform apply -auto-approve 
+
+build:
+    stage: build 
+    script:
+        - docker build -t pathnex:latest .
+        - docker push <dockerhub-user>/pathnex:latest 
+
+deploy:
+    stages: deploy 
+    script: 
+        - kubectl apply -f deployment.yml 
+        - helm upgrade --install pathnex ./pathnex
+
+monitor:
+    stage: monitor
+    script:
+        - kubectl get pods
+        - kubectl get svc 
+        - kubectl top pods
+
+# Network Policy 
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+    name: pathnex-network-policy 
+spec:
+    podSelector:
+        matchLabels:
+            app: pathnex
+    policyTypes:
+        - Ingress 
+        - Egress 
+
+# Kubernetes - Horizontal Pod AutoScaler 
+
+apiVersion: autoscaling/v2 
+kind: HorizontalPodAutoscaler 
+metadata:
+    name: pathnex-hpa 
+spec:
+    scaleTargetRef: 
+        apiVersion: apps/v1
+        kind: Deployment 
+        name: pathnex-app 
+    minReplicas: 2 
+    maxReplicas: 10 
+    metrics:
+        - type: Resource
+          resource:
+            name: cpu 
+            target:
+                type: Utilization
+                averageUtilization: 70
+
+# Monitoring
+
+kubectl get pods 
+kubectl get svc 
+kubectl get nodes 
+kubectl top pods 
+kubectl top nodes 
+helm list 
+terraform show
+terraform show 
+docker ps 
